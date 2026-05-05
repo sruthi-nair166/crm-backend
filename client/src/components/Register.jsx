@@ -1,7 +1,17 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-  const handleRegister = (e) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     if (!/^[0-9]{10}$/.test(phone)) {
@@ -12,6 +22,21 @@ export default function Register() {
     if (password.length < 6) {
       alert("Password must not be less than 6 characters");
       return;
+    }
+
+    try {
+      await axios.post("http://localhost:3000/api/users/register", {
+        name,
+        email,
+        phone,
+        password,
+      });
+
+      navigate("/login");
+
+      alert("User registered successfully");
+    } catch (err) {
+      alert("Registration failed");
     }
   };
 
@@ -24,6 +49,8 @@ export default function Register() {
           <div className="flex flex-col pt-8">
             <label htmlFor="text">Name:</label>
             <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="border-2 border-slate-300 h-10 ps-2 rounded-md"
               type="text"
               id="text"
@@ -31,9 +58,11 @@ export default function Register() {
               required
             />
           </div>
-          <div className="flex flex-col pt-8">
+          <div className="flex flex-col pt-6">
             <label htmlFor="email">Email:</label>
             <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="border-2 border-slate-300 h-10 ps-2 rounded-md"
               type="email"
               id="email"
@@ -41,9 +70,17 @@ export default function Register() {
               required
             />
           </div>
-          <div className="flex flex-col pt-8">
+          <div className="flex flex-col pt-6">
             <label htmlFor="phone">Phone:</label>
             <input
+              value={phone}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                if (!/^\d*$/.test(value)) return;
+                setPhone(e.target.value);
+              }}
+              maxLength={10}
               className="border-2 border-slate-300 h-10 ps-2 rounded-md"
               type="text"
               id="phone"
@@ -51,9 +88,11 @@ export default function Register() {
               required
             />
           </div>
-          <div className="flex flex-col pt-8">
+          <div className="flex flex-col pt-6">
             <label htmlFor="password">Password:</label>
             <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="border-2 border-slate-300 h-10 ps-2 rounded-md"
               type="password"
               id="password"

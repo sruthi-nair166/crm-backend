@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 // Register
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phone } = req.body;
 
   const hashed = await bcrypt.hash(password, 10);
 
@@ -12,6 +12,8 @@ exports.register = async (req, res) => {
     name,
     email,
     password: hashed,
+    phone,
+    isCustomer: false,
   });
 
   res.json(user);
@@ -37,11 +39,19 @@ exports.login = async (req, res) => {
 // Create
 exports.createUser = async (req, res) => {
   try {
-    if (!req.body.name || !req.body.email) {
-      return res.status(400).json({ msg: "Missing fields" });
+    const { name, email, phone } = req.body;
+
+    if (!name || !email || !phone) {
+      return res.status(400).json({ msg: "All fields are required" });
     }
 
-    const user = await User.create(req.body);
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      isCustomer: true,
+    });
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -51,7 +61,7 @@ exports.createUser = async (req, res) => {
 // Read
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ isCustomer: true });
     res.json(users);
   } catch (err) {
     res.status(500).json({ msg: err.message });
